@@ -3,7 +3,9 @@ package com.example.journal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.R.attr.padding
+import android.hardware.lights.Light
 import android.os.Bundle
+import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -38,6 +41,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -46,12 +51,14 @@ import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -77,7 +84,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(){
-    var showBottomSheet by remember {mutableStateOf(false)}
+    var showBottomSheet by rememberSaveable {mutableStateOf(false)}
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
     )
@@ -126,6 +133,7 @@ fun Home(){
                     color = Color.White,
                     modifier = Modifier.padding(10.dp),
                 )
+
             }
 
         }
@@ -136,47 +144,67 @@ fun Home(){
             sheetState = sheetState,
             onDismissRequest = { showBottomSheet = false }
         ) {
-            Text(
-                "Swipe up to open sheet. Swipe down to dismiss.",
-                modifier = Modifier.padding(16.dp)
-            )
+            InsideSheet()
         }
     }
 }
+@Preview
+@Composable
+fun BasicTextFieldExample() {
+    var text by rememberSaveable { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .padding(5.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ){
+        TextField(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            value = text,
+            onValueChange = {
+                text = it
+            },
+            textStyle = TextStyle(
+                color = if (text.isEmpty()) Color.LightGray else MaterialTheme.colorScheme.primary
+            ),
+            placeholder = {
+                Text("Type here", color = Color.LightGray)
+            }
+        )
+    }
+}
 
+@Composable
+fun FilledButtonExample(onClick: () -> Unit) {
+    Button(onClick = { onClick() }) {
+        Text("Save")
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PartialBottomSheet() {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
-    )
-
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-
-    ) {
-        Button(
-            onClick = { showBottomSheet = true }
-        ) {
-            Text("Display partial bottom sheet")
-        }
-
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                modifier = Modifier.fillMaxHeight(),
-                sheetState = sheetState,
-                onDismissRequest = { showBottomSheet = false }
-            ) {
-                Text(
-                    "Swipe up to open sheet. Swipe down to dismiss.",
-                    modifier = Modifier.padding(16.dp)
+fun InsideSheet(){
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+    ){
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("NEW JOURNAL") }
                 )
+            },
+            floatingActionButton = {
+                FilledButtonExample ( onClick = {} )
+            },
+            floatingActionButtonPosition = FabPosition.EndOverlay
+        ){
+                innerPadding ->
+            Column(
+                modifier = Modifier.padding(innerPadding),
+            ) {
+                BasicTextFieldExample()
             }
+
         }
     }
 }
-
 
